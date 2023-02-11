@@ -2,3 +2,15 @@
 ## A simple physics-based game I made while learning JavaScript and Pixi JS.
 
 Makes use of Pixi JS version <b>5.1.3</b>
+
+### How do I run it?
+ - Assuming you have VS Code installed, open the project folder in VS Code and make sure you have the Live Server extension installed.
+ - You should find a "Live Server" button at the bottom right. Click it and VS Code will start a server for your project with your browser.
+ - Once it has been opened, click on "webpage.html" and congrats, you're now able to run the project.
+ <br><br>To be honest, you can use any IDE of your choice and figure running the project on your own. I personally think VS Code is more convenient.
+ 
+### Okay, but how do I open a folder with VS Code?
+ Upon opening VS Code, you can click on "File" and "Open Folder" and you can navigate to the project folder.
+ Another way to do it is to navigate to the folder with File Explorer and typing "cmd" at the address bar to open Command Prompt. Over there, just type "code ." and it will open VS Code in that folder.
+
+Make sure you enable <b>hardware acceleration</b> in your browser.
