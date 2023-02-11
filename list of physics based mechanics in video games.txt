@@ -1,0 +1,52 @@
+Quake
+	 - Movement is based on velocity.
+	 - Velocity increases when zigzagging.
+	 - Jumping while not pressing any of the keys still retains velocity.
+	 - Explosions from rockets and grenades can help aid velocity. Responsible for "rocket jumping".
+
+Quake II
+	 - All of Quake.
+	 - Physics is based on the center of the map, resulting in the player having a tendency of going towards it.
+	 - Ramp boost which propels the player in the direction of the ramp.
+	 - Edge boost where the player propels upwards from a ledge (I don't know about this one).
+
+Quake III
+	 - All of Quake I with pretty much everything of Quake II removed.
+	 - Features boost and jump pads. Boost pads make use of the Quake II's ramp boost. Jump pads increase a player's jump height and can be angled to propel the player in the said direction.
+	 - Movement can be affected by rockets, grenades and shots from the Railgun.
+
+Counter Strike 1.6
+	 - Gun boosting, where a player can boost a player upwards by shooting at them. Allows for reaching places which would otherwise be inaccesible.
+	 - Roof boosting where a player hops on another player and the latter boosts the former above. Can end up clipping the former through a roof.
+
+Team Fortress Classic
+	 - Concussion grenades can be used to boost oneself up distances and inaccessible areas.
+	 - Like the original QWTF, it features rocket jumping and grenade jumping, but no bunny hopping or strafe jumping.
+	 - Scouts can deploy caltrops, which hinders the movement of anyone who steps on them.
+
+Team Fortress 2
+	 - Features most of Quake's movement, without bunny hopping and strafe jumping. All classes are affected by rockets and grenades.
+	 - Shots from the sentries can affect movement. Certain weapons can aid one's movement and / or hinder the mobility of other players.
+
+Ori and The Blind Forest (with all skills unlocked)
+	 - Downward dash while mid-air which can destroy obstacles and deal damage.
+	 - Double jumping.
+	 - Mid air reprojection that resets last known velocity and replenishes double jumping.
+	 - The player can glide with a feather that dampens free fall. Can be used to propel the player upwards where there is wind.
+	 - Movement based on velocity.
+
+Portal
+	 - Movement based on momentum.
+	 - Movement can be aided with certain gels and through specific portal placement and can thus contribute to more momentum.
+	 - Movement can also be affected by bullets.
+
+Hollow Knight
+	 - Parrying causes knockback and will propel the player in the opposite direction.
+	 - Parrying can be done on enemies and on both environmental objects and hazards.
+	 - "Dashmaster" allows the player to dash downwards. Another charm makes the player resilient to knockback.
+
+Dead Cells
+	 - Passive ability for the player to gain a speed boost after achieving three consecutive kills for a small period of time.
+	 - Landing from a height stuns the player for a short amount of time.
+	 - Movement is basic and based on input. A small boost is noticed when dodge rolling.
+	 - A downwards dash can be performed where the player can descend faster and can damage upon impact with the ground.
