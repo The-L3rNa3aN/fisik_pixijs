@@ -1,8 +1,17 @@
 /*This is the place where all the execution happens.*/
 /*BUGS:
-    1. The highermost tile (practically the first collidable tile) features collision even when the player is away from its hor. range, having it float. Jumping will reverse the bug.
-    2. Jumping is different on different systems.
-    3. On start, the player falls and clips through some tiles.
+    1. The highermost tiles feature collision even when the player is away from its hor. range, having it float. Jumping will reverse the bug.
+    2. Jumping and lateral acceleration is different in different systems. HIGH PRIORITY.
+    3. The player appears to snap to the wall bounds.
+    
+    TO DO:
+    Wall-jumping.
+    Jump pad - propels the player upwards 1.25 times the normal jump.
+    Tweak the jump height. It's too much at the moment. (Try moving the jump code. Gives different results.)
+    Improve the collision model. It quite wacky. Make use of "getBounds()" for it.
+
+THINGS THAT I CAN WORK ON BUT JUST CAN'T DECIDE:
+    *None at the moment*
 */
 
 import { Collide, Trigger, IsColliding, IsColliding_Gravity } from './collision.js';
@@ -18,7 +27,7 @@ var app = new PIXI.Application                                                  
 document.body.appendChild(app.view);
 
 // Load textures.
-app.loader.add('bunny', 'https://pixijs.io/examples/examples/assets/bunny.png')
+app.loader.add('bunny', './Textures/bunny.png')
 app.loader.add('button', './Textures/tile_white.png')
 app.loader.add('obstacle', './Textures/tile_green.png')
 app.loader.add('collectible', './Textures/tile_orange.png')
@@ -27,15 +36,25 @@ app.loader.add('dirt', './Textures/tile_brown.png')
 
 //Player stuff.
 var isGrounded = false;                                                                 //Boolean to check if the player is touching the ground.
+var onLeftWall = false;                                                                 //Boolean to check if the player is touching a wall on the left. Required for wall-jumping.
+var onRightWall = false;                                                                //Boolean to check if the player is touching a wall on the right. Required for wall-jumping.
+var playerScore = 0;
+var gConstant = 10;                                                                     //Acceleration due to gravity.
+var xVel = 0, yVel = 0;                                                                 //Player body's velocity.
+var xAccel = 0, yAccel = 0;                                                             //Player body's acceleration.
+var jumpHeight = 2;                                                                     //Jump height. What else?
+var floatInput = 0;
+var speed = 0.7;
+var fCoeff = 0.2;                                                                       //Friction coefficient.
+
+var midPointX = app.renderer.width / 2;
+var midPointY = app.renderer.height / 2;
 
 function startup()
 {
-    var playerScore = 0;                                                                //Player score.
-    var gConstant = 10;                                                                //Acceleration due to gravity.
-    var vel = 0;                                                                        //Player body's velocity.
-    var accel = 0;                                                                      //Player body's acceleration.
-    var jumpHeight = 2;                                                                 //Jump height. What else?
+    var collidableTilesContainer = new PIXI.Container();
 
+    //Booleans which return true when their respective keys are pressed.
     var upClicked = false;
     var downClicked = false;
     var leftClicked = false;
@@ -73,7 +92,6 @@ function startup()
 
     //Loading the level.
     var level = Map_01();
-    var obstacleArray = new Array();
     var tileX = 0; var tileY = 0;
     for(var i = 0; i < level.length; i++)
     {
@@ -86,8 +104,8 @@ function startup()
                 obstacle.x = tileX + 25; obstacle.y = tileY + 25;
                 obstacle.height = 50; obstacle.width = 50;
                 obstacle.anchor.set(0.5);
-                app.stage.addChild(obstacle);
-                obstacleArray.push(obstacle);
+                collidableTilesContainer.addChild(obstacle); // app.stage.addChild(obstacle);
+                // obstacleArray.push(obstacle);
                 break;
 
             case 2:
@@ -114,31 +132,66 @@ function startup()
     }
 
     bunny.anchor.set(0.5);                                                              //Center anchor points.
-    bunny.x = app.renderer.width / 2;                                                   // Move the sprite to the center of the screen
-    bunny.y = app.renderer.height / 2;
-    
+    bunny.x = midPointX;                                                   //Move the sprite to the center of the screen
+    bunny.y = midPointY;
+
+    //#region Scrollable Environment Indicator (not for the final game)
+    var line1 = new PIXI.Graphics()
+        .beginFill(0xfc4903)
+        .lineStyle(4, 0xFFFFFF, 1)
+        .moveTo(midPointX - 75, midPointY - 50)
+        .lineTo(midPointX + 75, midPointY - 50)
+        .closePath()
+        .endFill();
+
+    var line2 = new PIXI.Graphics()
+        .beginFill(0xfc4903)
+        .lineStyle(4, 0xFFFFFF, 1)
+        .moveTo(midPointX + 75, midPointY - 50)
+        .lineTo(midPointX + 75, midPointY + 400)
+        .closePath()
+        .endFill();
+
+    var line3 = new PIXI.Graphics()
+        .beginFill(0xfc4903)
+        .lineStyle(4, 0xFFFFFF, 1)
+        .moveTo(midPointX + 75, midPointY + 400)
+        .lineTo(midPointX - 75, midPointY + 400)
+        .closePath()
+        .endFill();
+
+    var line4 = new PIXI.Graphics()
+        .beginFill(0xfc4903)
+        .lineStyle(4, 0xFFFFFF, 1)
+        .moveTo(midPointX - 75, midPointY + 400)
+        .lineTo(midPointX - 75, midPointY - 50)
+        .closePath()
+        .endFill();
+    //#endregion
+        
     //Staged items have their sprite orders assigned in ascending order.
     app.stage.addChild(bunny);
+    app.stage.addChild(collidableTilesContainer);
+    app.stage.addChild(line1, line2, line3, line4);                                     //For visualizing the bounding box. Comment to disable it.
     
     app.ticker.add(function(delta)                                                  //Listen for animate update
     {
-        //Is the player touching the ground?
-        //isGrounded = IsColliding(bunny, obstacle);
-        
         //Collectibles here.
         //Collectible(bunny, testCollectible, playerScore);
+
+        floatInput = Math.min(0, 1);                                                //Similar to Unity's old input system, pressing a key changes its value from 0 to 1.
 
         //Gravity if the player isn't touching the ground.
         if(!isGrounded)
         {
-            vel = gConstant * delta / 10;
-            accel += vel * delta / 10;
-            bunny.y += accel;
+            yVel = gConstant * delta / 10;
+            yAccel += yVel * delta / 10;
+            bunny.y += yAccel;
         }
         else
         {
-            vel = 0.1;
-            accel = 0;
+            yVel = 0.1;
+            yAccel = 0;
         }
 
         //Movement code based on button presses.
@@ -146,44 +199,94 @@ function startup()
         {
             if(isGrounded)
             {
-                vel -= Math.sqrt(jumpHeight * gConstant) * delta;                   //Based on Bjorn's jump equation: v = SQRT(jumpHeight * -2 * gravity).
-                accel = vel / delta;                                                //Acceleration (Impulsive Force) = Velocity / Time.
-                bunny.y += accel;                                                   //I dunno how I got this working, and my brain isn't in the mood to find out (JK. Adding up the minuses here.).
+                yVel -= Math.sqrt(jumpHeight * gConstant) * delta;                   //Based on Bjorn's jump equation: v = SQRT(jumpHeight * -2 * gravity).
+                yAccel = yVel / delta;                                               //Acceleration (Impulsive Force) = Velocity / Time.
+                bunny.y += yAccel;                                                   //I dunno how I got this working, and my brain isn't in the mood to find out (JK. Adding up the minuses here.).
                 isGrounded = false;
+            }
+            else
+            {
+                if(onLeftWall)
+                {
+                    console.log("Left wall");
+                }
+
+                if(onRightWall)
+                {
+                    console.log("Right wall");
+                }
             }
             //bunny.y -= 2;
         }
 
         //if(downClicked) bunny.y += 2 * delta;
-        if(leftClicked) bunny.x -= 2 * delta;
-        if(rightClicked) bunny.x += 2 * delta;
+        // if(leftClicked) bunny.x -= 2 * delta;
+        // if(rightClicked) bunny.x += 2 * delta;
 
-        //The player should collide with these. ALWAYS CALL ANY COLLISION-RELATED FUNCTIONS AFTER THE GRAVITY-RELATED CODE.
-        for(var i = 0; i < obstacleArray?.length; i++)
+        xVel = 0;                                                                       //When not pressing anything, velocity will reduce to 0 and so will acceleration.
+        if(leftClicked)
         {
-            testCollide(bunny, obstacleArray[i]);
+            floatInput += delta;                                                        //Pressing 'A' or 'D' will increment 'floatInput' from 0 to 1.
+            xVel = -speed * floatInput * delta;                                         //A minus here since going left means you're travelling towards the origin, so your X-position decreases.
         }
 
-        //console.log(accel);
+        if(rightClicked)
+        {
+            floatInput += delta;
+            xVel = speed * floatInput * delta;
+        }
+
+        //The player should collide with these. ALWAYS CALL ANY COLLISION-RELATED FUNCTIONS AFTER THE GRAVITY-RELATED CODE.
+        for(let i = 0; i < collidableTilesContainer.children.length; i++)
+        {
+            testCollide(bunny, collidableTilesContainer.children[i].getBounds());
+        }
+
+        xAccel += xVel * delta;                                                         //If you didn't know, acceleration is the rate of change of velocity.
+        bunny.x += xAccel;                                                              //And we are adding it all to the X-position of the player.
+        xAccel -= fCoeff * xAccel;                                                      //Player acceleration, meet friction (the friction coefficient is multiplied with the current acceleration and serves as counter movement).
+        
+        if(Math.abs(xAccel) < 0.01) xAccel = 0;                                         //When not pressing anything, the player still drifts a little here and there. Any value lesser than 0.01 will be eliminated and set to 0.
+
+        //Scroll the environment if the player is trying to go beyond the set wall boundaries.
+        if(bunny.x < midPointX - 50 && leftClicked) collidableTilesContainer.x -= xAccel;
+
+        if(bunny.x > midPointX + 50 && rightClicked) collidableTilesContainer.x -= xAccel;
+
+        if(bunny.y <= midPointY - 50) collidableTilesContainer.y -= yAccel;
+
+        if(bunny.y >= midPointY + 400) collidableTilesContainer.y -= yAccel;
+
+        WallBoundaries(bunny);                                                          //Wall boundaries, of course.
     });
 }
 
 function testCollide(p, o)
 {
+    o.x += 25; o.y += 25;                       //Offsetting because we're using "getBounds()".
+
     if(p.x + p.width / 2 > o.x - o.width / 2)     //"o" collision on the left.
     {
         if(p.x < o.x && p.y > o.y - o.height / 2 && p.y < o.y + o.height / 2)   //If "p"'s X pos is lesser than "o"'s and if "p" is within "o"'s Y-range.
         {
-            p.x = o.x - o.width / 2 - p.width / 2; return;
+            p.x = o.x - o.width / 2 - p.width / 2;
+            onLeftWall = true;
+            return;
         }
+
+        onLeftWall = false;
     }
 
     if(p.x - p.width / 2 < o.x + o.width / 2)     //"o" collision on the right.
     {
         if(p.x > o.x && p.y > o.y - o.height / 2 && p.y < o.y + o.height / 2)   //Ditto except if "p"'s X pos is greater than "o"'s.
         {
-            p.x = o.x + o.width / 2 + p.width / 2; return;
+            p.x = o.x + o.width / 2 + p.width / 2;
+            onRightWall = true;
+            return;
         }
+
+        onRightWall = false;
     }
 
     if(p.y + p.height / 2 > o.y - o.height / 2)   //"o" collision above.
@@ -202,7 +305,24 @@ function testCollide(p, o)
     {
         if(p.y > o.y && p.x > o.x - o.width / 2 && p.x < o.x + o.width / 2)     //Ditto except if "p"'s Y pos is greater than "o"'s.
         {
-            p.y = o.y + o.height / 2 + p.height / 2; return;
+            p.y = o.y + o.height / 2 + p.height / 2;
+            yAccel = 0;                                                          //Without this, the player will remain stuck on the roof until the length of the jump is coming to an end.
+            return;
         }
     }
+}
+
+function WallBoundaries(player)
+{
+    if(player.x >= midPointX + 75)
+        player.x = midPointX + 75;
+
+    if(player.x <= midPointX - 75)
+        player.x = midPointX - 75;
+
+    if(player.y <= midPointY - 50)
+        player.y = midPointY - 50;
+
+    if(player.y >= midPointY + 400)
+        player.y = midPointY + 400;
 }

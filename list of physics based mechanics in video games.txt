@@ -15,6 +15,14 @@ Quake III
 	 - Features boost and jump pads. Boost pads make use of the Quake II's ramp boost. Jump pads increase a player's jump height and can be angled to propel the player in the said direction.
 	 - Movement can be affected by rockets, grenades and shots from the Railgun.
 
+Half Life
+	 - Certain moving platforms (such as rails) can use their momentum and propel the player to great distances.
+	 - Large fans are present which propel the player upwards.
+	 - Item boosting was present where the player can boost themselves while handling movable objects. Now, players can push objects only.
+
+Half Life: Opposing Force
+	 - The player can make use of ropes along with their momentum to perform a swing.
+
 Counter Strike 1.6
 	 - Gun boosting, where a player can boost a player upwards by shooting at them. Allows for reaching places which would otherwise be inaccesible.
 	 - Roof boosting where a player hops on another player and the latter boosts the former above. Can end up clipping the former through a roof.
