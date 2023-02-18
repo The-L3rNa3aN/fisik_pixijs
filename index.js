@@ -1,8 +1,6 @@
 /*This is the place where all the execution happens.*/
 /*BUGS:
     1. The highermost tiles feature collision even when the player is away from its hor. range, having it float. Jumping will reverse the bug.
-    2. Jumping and lateral acceleration is different in different systems. HIGH PRIORITY.
-    3. The player appears to snap to the wall bounds.
     
     TO DO:
     Wall-jumping.
@@ -172,14 +170,15 @@ function startup()
     //Staged items have their sprite orders assigned in ascending order.
     app.stage.addChild(bunny);
     app.stage.addChild(collidableTilesContainer);
-    app.stage.addChild(line1, line2, line3, line4);                                     //For visualizing the bounding box. Comment to disable it.
+    // app.stage.addChild(line1, line2, line3, line4);                                     //For visualizing the bounding box. Comment to disable it.
     
+    app.ticker.maxFPS = 60;
     app.ticker.add(function(delta)                                                  //Listen for animate update
     {
+        floatInput = Math.min(0, 1);                                                //Similar to Unity's old input system, pressing a key changes its value from 0 to 1.
+        
         //Collectibles here.
         //Collectible(bunny, testCollectible, playerScore);
-
-        floatInput = Math.min(0, 1);                                                //Similar to Unity's old input system, pressing a key changes its value from 0 to 1.
 
         //Gravity if the player isn't touching the ground.
         if(!isGrounded)
@@ -250,11 +249,8 @@ function startup()
 
         //Scroll the environment if the player is trying to go beyond the set wall boundaries.
         if(bunny.x < midPointX - 50 && leftClicked) collidableTilesContainer.x -= xAccel;
-
         if(bunny.x > midPointX + 50 && rightClicked) collidableTilesContainer.x -= xAccel;
-
         if(bunny.y <= midPointY - 50) collidableTilesContainer.y -= yAccel;
-
         if(bunny.y >= midPointY + 400) collidableTilesContainer.y -= yAccel;
 
         WallBoundaries(bunny);                                                          //Wall boundaries, of course.
