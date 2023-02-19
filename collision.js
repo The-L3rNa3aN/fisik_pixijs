@@ -76,3 +76,18 @@ export function IsColliding_Gravity(o1, o2) /* Basically "IsColliding" but only 
     
     return false;
 }
+
+export function WallBoundaries(player, midPointX, midPointY)
+{
+    if(player.x >= midPointX + 75)
+        player.x = midPointX + 75;
+
+    if(player.x <= midPointX - 75)
+        player.x = midPointX - 75;
+
+    if(player.y <= midPointY - 50)
+        player.y = midPointY - 50;
+
+    if(player.y >= midPointY + 400)
+        player.y = midPointY + 400;
+}

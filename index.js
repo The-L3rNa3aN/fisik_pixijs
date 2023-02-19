@@ -12,7 +12,7 @@ THINGS THAT I CAN WORK ON BUT JUST CAN'T DECIDE:
     *None at the moment*
 */
 
-import { Collide, Trigger, IsColliding, IsColliding_Gravity } from './collision.js';
+import { Collide, Trigger, IsColliding, IsColliding_Gravity, WallBoundaries } from './collision.js';
 import { Collectible } from './collectible.js';
 import { Map_01 } from './level.js';
 
@@ -253,7 +253,7 @@ function startup()
         if(bunny.y <= midPointY - 50) collidableTilesContainer.y -= yAccel;
         if(bunny.y >= midPointY + 400) collidableTilesContainer.y -= yAccel;
 
-        WallBoundaries(bunny);                                                          //Wall boundaries, of course.
+        WallBoundaries(bunny, midPointX, midPointY);                                                          //Wall boundaries, of course.
     });
 }
 
@@ -306,19 +306,4 @@ function testCollide(p, o)
             return;
         }
     }
-}
-
-function WallBoundaries(player)
-{
-    if(player.x >= midPointX + 75)
-        player.x = midPointX + 75;
-
-    if(player.x <= midPointX - 75)
-        player.x = midPointX - 75;
-
-    if(player.y <= midPointY - 50)
-        player.y = midPointY - 50;
-
-    if(player.y >= midPointY + 400)
-        player.y = midPointY + 400;
 }
