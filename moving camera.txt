@@ -1,1 +1,0 @@
-Add all scene elements in a container. Move the container according to how near the player is to the screen bounds. Simple!

@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "@pixi/tilemap": "^3.2.2"
+    "pixi.js": "^7.1.3"
   }
 }
