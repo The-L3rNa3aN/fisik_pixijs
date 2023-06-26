@@ -1,10 +1,13 @@
-import * as PIXI from "./node_modules/pixi.js/dist/pixi.mjs";
+/* As the name suggests, this consists of all player-related logic. */
+
+import * as PIXI from "/node_modules/pixi.js/dist/pixi.mjs";
 
 export default class Player extends PIXI.Sprite
 {
     constructor(assetPath)
     {
         super(PIXI.Texture.from(assetPath));
+        this.objectTag = "Player";
         this.isGrounded = false;                                                    //Boolean to check if the player is touching the ground.
         this.gConstant = 10;                                                        //Acceleration due to gravity.
         this.xVel = 0; this.yVel = 0;                                               //Player velocity.
@@ -36,6 +39,7 @@ export default class Player extends PIXI.Sprite
 
     Update(delta)
     {
+        // console.log(this.position);
         this.floatInput = Math.min(0, 1);
 
         //Gravity if the player isn't touching the ground.
@@ -54,31 +58,14 @@ export default class Player extends PIXI.Sprite
         if(this.upClicked)                   //Jump.
         {
             if(this.isGrounded)
-            {
-                this.yVel -= Math.sqrt(this.jumpHeight * this.gConstant) * delta;        //Based on Bjorn's jump equation: v = SQRT(jumpHeight * -2 * gravity).
-                this.yAccel = this.yVel / delta;                                         //Acceleration (Impulsive Force) = Velocity / Time.
-                this.y += this.yAccel;                                                   //I dunno how I got this working, and my brain isn't in the mood to find out (JK. Adding up the minuses here.).
-                this.isGrounded = false;
-            }
-            // else
-            // {
-            //     if(onLeftWall)
-            //     {
-            //         console.log("Left wall");
-            //     }
-            //     if(onRightWall)
-            //     {
-            //         console.log("Right wall");
-            //     }
-            // }
-            //bunny.y -= 2;
+                this.Jump(this.jumpHeight, delta);
         }
 
         this.xVel = 0;                                                                  //When not pressing anything, velocity will reduce to 0 and so will acceleration.
         if(this.leftClicked)
         {
             this.floatInput += delta;                                                   //Pressing 'A' or 'D' will increment 'floatInput' from 0 to 1.
-            this.xVel = -this.speed * this.floatInput * delta;                          //A minus here since going left means you're travelling towards the origin, so your X-position decreases.
+            this.xVel = -this.speed * this.floatInput * delta;                         //A minus here since going left means you're travelling towards the origin, so your X-position decreases.
         }
         if(this.rightClicked)
         {
@@ -93,6 +80,14 @@ export default class Player extends PIXI.Sprite
         if(Math.abs(this.xAccel) < 0.01) this.xAccel = 0;                                 //When not pressing anything, the player still drifts a little here and there. Any value lesser than 0.01 will be eliminated and set to 0.
     }
 
+    Jump(_jumpHeight, _delta)
+    {
+        this.yVel -= Math.sqrt(_jumpHeight * this.gConstant) * _delta;                      //Based on Bjorn's jump equation: v = SQRT(jumpHeight * -2 * gravity).
+        this.yAccel = this.yVel / _delta;                                                   //Acceleration (Impulsive Force) = Velocity / Time.
+        this.y += this.yAccel;                                                              //I dunno how I got this working, and my brain isn't in the mood to find out (JK. Adding up the minuses here.).
+        this.isGrounded = false;
+    }
+
     CollideWith(o)
     {
         let bounds1 = this.getBounds();
@@ -104,17 +99,17 @@ export default class Player extends PIXI.Sprite
             {
                 this.x -= (bounds1.x + bounds1.width) - bounds2.x;
                 this.xAccel = 0;
-                return ;
+                return true;
             }
         }
 
-        if (bounds1.x < bounds2.x+bounds2.width)
+        if (bounds1.x < bounds2.x + bounds2.width)
         {
             if (bounds1.x > bounds2.x +bounds2.width - 5 && bounds1.y + bounds1.height - 5 > bounds2.y && bounds1.y < bounds2.y + bounds2.height)
             {
                 this.x += (bounds2.x + bounds2.width) - bounds1.x;
                 this.xAccel = 0;
-                return;
+                return true;
             }
         }
 
@@ -124,7 +119,7 @@ export default class Player extends PIXI.Sprite
             {
                 this.y -= (bounds1.y + bounds1.height) - bounds2.y;
                 this.isGrounded = true;
-                return;
+                return true;
             }
             this.isGrounded = false;
         }
@@ -135,8 +130,10 @@ export default class Player extends PIXI.Sprite
             {
                 this.y += (bounds2.y + bounds2.height) - bounds1.y;
                 this.yAccel = 0;
-                return;
+                return true;
             }
         }
+
+        return false;
     }
 }

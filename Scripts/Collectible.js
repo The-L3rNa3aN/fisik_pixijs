@@ -1,5 +1,5 @@
 /* Simple stuff for collectibles. */
-import { Trigger } from "./collision.js";
+import { Trigger } from "./Collision.js";
 
 export function Collectible(player, object, score)
 {
