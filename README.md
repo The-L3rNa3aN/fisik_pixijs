@@ -11,9 +11,5 @@
  - Before running and checking if it works, make sure you have Node.js installed. You'll be needing this to install the latest version of Pixi in your project. In the VS Code terminal, type the following: -<br>
  ```npm install pixi.js```
  - It will take some time to install, but after that, you can now get down to business and fool around with the code.
- 
-### Okay, but how do I open a folder with VS Code?
- Upon opening VS Code, you can click on "File" and "Open Folder" and you can navigate to the project folder.
- Another way to do it is to navigate to the folder with File Explorer and typing "cmd" at the address bar to open Command Prompt. Over there, just type "code ." and it will open VS Code in that folder.
 
 Make sure you enable <b>hardware acceleration</b> in your browser.
